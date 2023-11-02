@@ -169,8 +169,8 @@
                 });
             }),
 
-          _("search",
-            "search for highlighted terms on SmugMug",
+          _("right-click to copy URL",
+            "rewire right click to copy image URL (for galleries that block right click)",
             function () {
                 var copyText = async (text) => { await navigator.clipboard.writeText(text); };
                 var allLinks = document.querySelectorAll('a.sm-tile-content');
