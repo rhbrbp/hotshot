@@ -7,22 +7,37 @@
         padding: 1em;
       }
       .item {
-        max-width: 22%;
+        width: 22%;
         border: 1px solid #808080;
         float: left;
         margin: 1em;
       }
-      .item .install {
-        display: block;
+      .item .title {
         padding: 0.25em 0.25em 0 0.25em;
+      }
+      .item .title .install {
         text-decoration: none;
         font-weight: bold;
+      }
+      .item .title .install:after {
+        content: " 🔗";
       }
       .item .desc {
         padding: 0 0.25em 0.5em 0.25em;
         margin: 0 0 0 0.1em;
         font-size: 75%;
         font-style: italic;
+      }
+      .desc ul {
+        margin: 0;
+        padding: 0;
+      }
+      .desc ul li {
+        list-style-type: none;
+        padding-left: 1em;
+      }
+      .desc ul li:before {
+        content: "• ";
       }
       .item pre {
         overflow: auto;
@@ -31,6 +46,11 @@
         margin: 0 1em 1em 1em;
         padding: 0.25em;
         height: 30ex;
+      }
+      .flex {
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
       }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify.min.js"></script>
@@ -54,7 +74,10 @@
 
 
             _("autoscroll",
-              "continue scrolling to end of page to load more content",
+              [
+                "continue scrolling to end of page to load more content",
+                "return to starting point at end",
+              ],
               function() {
                 var screensPerSecond = .9;
                 var refreshRate = 1;
@@ -170,7 +193,10 @@
             }),
 
           _("right-click to copy URL",
-            "rewire right click to copy image URL (for galleries that block right click)",
+            [
+                "rewire right click to copy image URL",
+                "for galleries that block right click",
+            ],
             function () {
                 var copyText = async (text) => { await navigator.clipboard.writeText(text); };
                 var allLinks = document.querySelectorAll('a.sm-tile-content');
@@ -220,6 +246,9 @@
               var item = document.createElement("div");
               item.className = "item";
               //
+              var title = document.createElement("div");
+              title.className = "title";
+              //
               var link = document.createElement("a");
               link.className = "install";
               var code = bookmarklets[i].code
@@ -228,11 +257,17 @@
                          .replace("\n", " ");
               link.href = `javascript:(${code})();`;
               link.innerHTML = bookmarklets[i].name;
-              item.appendChild(link);
+              title.appendChild(link);
+              item.appendChild(title);
               //
               var desc = document.createElement("p");
               desc.className = "desc";
-              desc.innerHTML = bookmarklets[i].desc;
+              if (bookmarklets[i].desc instanceof Array)
+                  desc.innerHTML = ("<ul>" +
+                                    bookmarklets[i].desc.map(t => `<li>${t}</li>`).join("") +
+                                    "</ul>");
+              else
+                  desc.innerHTML = bookmarklets[i].desc;
               item.appendChild(desc);
               //
               var pre = document.createElement("pre");
@@ -265,7 +300,7 @@
       Install a bookmarklet by dragging its name to your bookmarks bar or
       a bookmarks folder.
     </p>
-    <div id="bookmarklets"></div>
+    <div id="bookmarklets" class="flex"></div>
   </body>
   <script>onload();</script>
 </html>
