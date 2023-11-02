@@ -169,7 +169,22 @@
                 });
             }),
 
-        ];
+          _("search",
+            "search for highlighted terms on SmugMug",
+            function () {
+                var copyText = async (text) => { await navigator.clipboard.writeText(text); };
+                var allLinks = document.querySelectorAll('a.sm-tile-content');
+                var evh = function(ev) {
+                    copyText(ev.target.offsetParent.href);
+                    ev.preventDefault();
+                };
+                for (var i = 0; i < allLinks.length; i++) {
+                    allLinks[i].addEventListener('contextmenu', evh);
+                }
+              }
+
+
+            ];
 
         function strcmp (a, b) {
             return a < b ? -1 :
