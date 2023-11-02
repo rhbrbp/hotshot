@@ -34,23 +34,6 @@
       }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify.min.js"></script>
-  </head>
-  <body>
-    <h1>HotShot</h1>
-    <header>a collection of SmugMug tools</header>
-    <p><a href="https://github.com/rhbrbp/hotshot/">Want to contribute?</a></p>
-    <h2>Bookmarklets</h2>
-    <p>
-      <a href="https://en.wikipedia.org/wiki/Bookmarklet">Bookmarklets</a>
-      are tiny applications that you run by clicking them from your
-      bookmarks bar.  They work on the page that you're viewing and they
-      can read or change the page content.
-    </p>
-    <p>
-      Install a bookmarklet by dragging its name to your bookmarks bar or
-      a bookmarks folder.
-    </p>
-    <div id="bookmarklets"></div>
     <script>
         function _ (name, desc, f) {
             return {
@@ -194,38 +177,59 @@
                    0
         }
         bookmarklets.sort((a, b) => strcmp(a.name, b.name));
-        var div = document.getElementById("bookmarklets");
-        for (var i = 0; i < bookmarklets.length; i++) {
-            var item = document.createElement("div");
-            item.className = "item";
-            //
-            var link = document.createElement("a");
-            link.className = "install";
-            var code = bookmarklets[i].code
-                       .replace(/^[\t ]+/mg, "")
-                       .replace(";\n", ";")
-                       .replace("\n", " ");
-            link.href = `javascript:(${code})();`;
-            link.innerHTML = bookmarklets[i].name;
-            item.appendChild(link);
-            //
-            var desc = document.createElement("p");
-            desc.className = "desc";
-            desc.innerHTML = bookmarklets[i].desc;
-            item.appendChild(desc);
-            //
-            var pre = document.createElement("pre");
-            pre.innerHTML = js_beautify(bookmarklets[i].code, {
-                "max_preserve_newlines": "2",
-                "preserve_newlines": true,
-                "break_chained_methods": true,
-                "brace_style": "end-expand",
-                "space_before_conditional": true,
-            });
-            item.appendChild(pre);
-            //
-            div.appendChild(item);
+
+        function onload() {
+          var div = document.getElementById("bookmarklets");
+          for (var i = 0; i < bookmarklets.length; i++) {
+              var item = document.createElement("div");
+              item.className = "item";
+              //
+              var link = document.createElement("a");
+              link.className = "install";
+              var code = bookmarklets[i].code
+                         .replace(/^[\t ]+/mg, "")
+                         .replace(";\n", ";")
+                         .replace("\n", " ");
+              link.href = `javascript:(${code})();`;
+              link.innerHTML = bookmarklets[i].name;
+              item.appendChild(link);
+              //
+              var desc = document.createElement("p");
+              desc.className = "desc";
+              desc.innerHTML = bookmarklets[i].desc;
+              item.appendChild(desc);
+              //
+              var pre = document.createElement("pre");
+              pre.innerHTML = js_beautify(bookmarklets[i].code, {
+                  "max_preserve_newlines": "2",
+                  "preserve_newlines": true,
+                  "break_chained_methods": true,
+                  "brace_style": "end-expand",
+                  "space_before_conditional": true,
+              });
+              item.appendChild(pre);
+              //
+              div.appendChild(item);
+          }
         }
     </script>
+  </head>
+  <body>
+    <h1>HotShot</h1>
+    <header>a collection of SmugMug tools</header>
+    <p><a href="https://github.com/rhbrbp/hotshot/">Want to contribute?</a></p>
+    <h2>Bookmarklets</h2>
+    <p>
+      <a href="https://en.wikipedia.org/wiki/Bookmarklet">Bookmarklets</a>
+      are tiny applications that you run by clicking them from your
+      bookmarks bar.  They work on the page that you're viewing and they
+      can read or change the page content.
+    </p>
+    <p>
+      Install a bookmarklet by dragging its name to your bookmarks bar or
+      a bookmarks folder.
+    </p>
+    <div id="bookmarklets"></div>
   </body>
+  <script>onload();</script>
 </html>
