@@ -187,7 +187,12 @@
 
         ];
 
-        bookmarklets.sort((a, b) => (a.name - b.name));
+        function strcmp (a, b) {
+            return a < b ? -1 :
+                   a > b ?  1 :
+                   0
+        }
+        bookmarklets.sort((a, b) => strcmp(a.name, b.name));
         var div = document.getElementById("bookmarklets");
         for (var i = 0; i < bookmarklets.length; i++) {
             var item = document.createElement("div");
