@@ -1,0 +1,225 @@
+<html>
+  <head>
+    <title>HotShot</title>
+    <style>
+      body {
+        font-family: "Open Sans", Lato, sans-serif;
+        padding: 1em;
+      }
+      .item {
+        max-width: 22%;
+        border: 1px solid #808080;
+        float: left;
+        margin: 1em;
+      }
+      .item .install {
+        display: block;
+        padding: 0.25em 0.25em 0 0.25em;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .item .desc {
+        padding: 0 0.25em 0.5em 0.25em;
+        margin: 0 0 0 0.1em;
+        font-size: 75%;
+        font-style: italic;
+      }
+      .item pre {
+        overflow: auto;
+        background-color: #d0f0d0;
+        border: 1px solid #d0d0d0;
+        margin: 0 1em 1em 1em;
+        padding: 0.25em;
+        height: 30ex;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify.min.js"></script>
+  </head>
+  <body>
+    <h1>HotShot</h1>
+    <header>a collection of SmugMug tools</header>
+    <h2>Bookmarklets</h2>
+    <p>
+      <a href="https://en.wikipedia.org/wiki/Bookmarklet">Bookmarklets</a>
+      are tiny applications that you run by clicking them from your
+      bookmarks bar.  They work on the page that you're viewing and they
+      can read or change the page content.
+    </p>
+    <p>
+      Install a bookmarklet by dragging its name to your bookmarks bar or
+      a bookmarks folder.
+    </p>
+    <div id="bookmarklets"></div>
+    <script>
+        function _ (name, desc, f) {
+            return {
+                "name": name,
+                "desc": desc || name,
+                "code": f.toString(),
+            };
+        }
+        var bookmarklets = [
+            // define bookmarklets here
+            // example:
+            // _("bookmarklet name",
+            //   "description of bookmarklet",
+            //   function () {
+            //     /* function code to run as bookmarklet */
+            // });
+
+
+
+            _("autoscroll",
+              "continue scrolling to end of page to load more content",
+              function() {
+                var screensPerSecond = .9;
+                var refreshRate = 1;
+                var lastY = 0;
+                var initY = window.scrollY;
+                var scroller = window.setInterval(() => {
+                    window.scrollBy(0, window.innerHeight * screensPerSecond / refreshRate);
+                    if (window.scrollY <= lastY) {
+                        clearInterval(scroller);
+                        window.scrollTo(0, initY);
+                    };
+                    lastY = window.scrollY;
+                }, 1000 / refreshRate);
+            }),
+
+
+            _("copy image urls",
+              "copy URLs from multiple selected images",
+              function () {
+                var copyText = (async (text) => { await navigator.clipboard.writeText(text); });
+                var sel = window.getSelection();
+                var a = document.querySelectorAll('a.sm-tile-content');
+                var txt = "";
+                for (var i = 0; i < a.length; i++) {
+                    if (a[i]==sel.anchorNode)
+                        break;
+                }
+                for (; i < a.length; i++) {
+                    if (a[i].href == '#') {
+                        var img = a[i].querySelector('img');
+                        var imgurl = img.src;
+                        var _ = imgurl.split('/');
+                        var size = _[_.length-2];
+                        imgurl = imgurl.replace('/'+size+'/', '/O/').replace('-'+size, '-O');
+                        txt += imgurl + "\n";
+                    }
+                    else {
+                        txt += a[i].href + '\n';
+                    }
+                    if (a[i] == sel.focusNode)
+                        break;
+                };
+                copyText(txt);
+            }),
+
+
+            _("pagerip",
+              "copy all image links from page",
+              function () {
+                var smugsite = new URL(window.location.href).host;
+                smugsite = prompt('New smugsite:', smugsite);
+                if (!smugsite.includes('.'))
+                    smugsite += '.smugmug.com';
+                var links = document.querySelectorAll('a[itemprop="url"]');
+                var out = Array.from(links).map(node => {
+                    var u = new URL(node.href);
+                    u.host = smugsite;
+                    return u.toString();
+                });
+                out = out.join("\n") + "\n";
+                setTimeout(() => {navigator.clipboard.writeText(out)}, 1000);
+            }),
+
+
+            _("lightbox",
+              "preview all images in this gallery",
+              function () {
+                var url = new URL(document.querySelectorAll('link[type="application/rss+xml"]')[0].getAttribute('href'), window.location.href);
+                var album = url.searchParams.get('Data').split('_')[1];
+                var apikey = "RCVHDGjcbc4Fhzq4qzqLdZmvwmwB6LM2";
+                var uri = `https://api.smugmug.com/api/v2/album/${album}!images?APIKey=${apikey}`;
+                uri = "https://corsproxy.io?" + encodeURIComponent(uri);
+                console.log(`album page fetch ${uri}`);
+                fetch(uri, {
+                    headers: {"Accept": "application/json"}
+                })
+                .then(r => {
+                    r.json()
+                    .then(d => {
+                        var body = document.getElementsByTagName("body")[0];
+                        body.innerHTML = "";
+                        body.style.margin = "3em";
+                        function getPage (d) {
+                            var images = d.Response.AlbumImage;
+                            for (var i = 0; i < images.length; i++) {
+                                var a = document.createElement("a");
+                                var img = document.createElement("img");
+                                img.src = images[i].ThumbnailUrl;
+                                a.href = images[i].WebUri;
+                                a.style.margin = '10px';
+                                a.appendChild(img);
+                                body.appendChild(a);
+                            }
+                        }
+                        getPage(d);
+                        var count = parseInt(d.Response.Pages.Count);
+                        var nPages = Math.ceil(parseInt(d.Response.Pages.Total)/count);
+                        for (var p = 1; p < nPages; p++) {
+                            var start = p*100 + 1;
+                            var uri = `https://api.smugmug.com/api/v2/album/${album}!images?start=${start}&count=${count}&APIKey=${apikey}`;
+                            console.log(`album subpage fetch ${uri}`);
+                            uri = "https://corsproxy.io?" + encodeURIComponent(uri);
+                            fetch(uri, {
+                                headers: {"Accept": "application/json"}
+                            })
+                            .then(r => {
+                                r.json()
+                                .then(d => getPage(d));
+                            });
+                        }
+                    })
+                });
+            }),
+
+        ];
+
+        bookmarklets.sort((a, b) => (a.name - b.name));
+        var div = document.getElementById("bookmarklets");
+        for (var i = 0; i < bookmarklets.length; i++) {
+            var item = document.createElement("div");
+            item.className = "item";
+            //
+            var link = document.createElement("a");
+            link.className = "install";
+            var code = bookmarklets[i].code
+                       .replace(/^[\t ]+/mg, "")
+                       .replace(";\n", ";")
+                       .replace("\n", " ");
+            link.href = `javascript:(${code})();`;
+            link.innerHTML = bookmarklets[i].name;
+            item.appendChild(link);
+            //
+            var desc = document.createElement("p");
+            desc.className = "desc";
+            desc.innerHTML = bookmarklets[i].desc;
+            item.appendChild(desc);
+            //
+            var pre = document.createElement("pre");
+            pre.innerHTML = js_beautify(bookmarklets[i].code, {
+                "max_preserve_newlines": "2",
+                "preserve_newlines": true,
+                "break_chained_methods": true,
+                "brace_style": "end-expand",
+                "space_before_conditional": true,
+            });
+            item.appendChild(pre);
+            //
+            div.appendChild(item);
+        }
+    </script>
+  </body>
+</html>
