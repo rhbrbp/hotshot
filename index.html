@@ -181,8 +181,29 @@
                 for (var i = 0; i < allLinks.length; i++) {
                     allLinks[i].addEventListener('contextmenu', evh);
                 }
-              }
+              }),
 
+
+            _("search",
+              "search for highlighted text on SmugMug",
+              function () {
+                  if (window.getSelection)
+                      sel = window.getSelection();
+                  else if (document.getSelection)
+                      sel = document.getSelection();
+                  else if (document.selection)
+                      sel = document.selection.createRange().text;
+                  sel = "" + sel;
+                  var off = sel.indexOf("i-");
+                  if (off > -1)
+                      sel = sel.substr(off+2);
+                  off = sel.indexOf("/");
+                  if (off > -1)
+                      sel = sel.substr(0, off);
+                  var url = "https://www.smugmug.com/search#c=galleries&q=" + encodeURIComponent(sel);
+                  window.open(url, "_blank");
+              }),
+      
 
             ];
 
