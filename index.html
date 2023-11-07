@@ -102,7 +102,7 @@
               function () {
                 var copyText = (async (text) => { await navigator.clipboard.writeText(text); });
                 var sel = window.getSelection();
-                var a = document.querySelectorAll('a.sm-tile-content');
+                var a = document.querySelectorAll('a');
                 var txt = "";
                 for (var i = 0; i < a.length; i++) {
                     if (a[i]==sel.anchorNode)
@@ -112,6 +112,7 @@
                     if (a[i].href == '#') {
                         var img = a[i].querySelector('img');
                         var imgurl = img.src;
+                        // this bit is specific to SM
                         var _ = imgurl.split('/');
                         var size = _[_.length-2];
                         imgurl = imgurl.replace('/'+size+'/', '/O/').replace('-'+size, '-O');
