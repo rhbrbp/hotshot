@@ -1,5 +1,6 @@
 <html>
   <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>HotShot</title>
     <style>
       body {
@@ -54,12 +55,14 @@
       }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/javascript-packer@0.0.5/lib/index.min.js"></script>
     <script>
         function _ (name, desc, f) {
             return {
                 "name": name,
                 "desc": desc || name,
                 "code": f.toString(),
+                "exec": f,
             };
         }
         var bookmarklets = [
@@ -142,55 +145,136 @@
             }),
 
 
+            // this is a motherfucker
+            // definitely shitty async, fixes welcome
             _("lightbox",
               "preview all images in this gallery",
               function () {
-                var url = new URL(document.querySelectorAll('link[type="application/rss+xml"]')[0].getAttribute('href'), window.location.href);
-                var album = url.searchParams.get('Data').split('_')[1];
-                var apikey = "RCVHDGjcbc4Fhzq4qzqLdZmvwmwB6LM2";
-                var uri = `https://api.smugmug.com/api/v2/album/${album}!images?APIKey=${apikey}`;
-                uri = "https://corsproxy.io?" + encodeURIComponent(uri);
-                console.log(`album page fetch ${uri}`);
-                fetch(uri, {
-                    headers: {"Accept": "application/json"}
-                })
-                .then(r => {
-                    r.json()
-                    .then(d => {
-                        var body = document.getElementsByTagName("body")[0];
-                        body.innerHTML = "";
-                        body.style.margin = "3em";
-                        function getPage (d) {
-                            var images = d.Response.AlbumImage;
-                            for (var i = 0; i < images.length; i++) {
-                                var a = document.createElement("a");
-                                var img = document.createElement("img");
-                                img.src = images[i].ThumbnailUrl;
-                                a.href = images[i].WebUri;
-                                a.style.margin = '10px';
-                                a.appendChild(img);
-                                body.appendChild(a);
-                            }
-                        }
-                        getPage(d);
-                        var count = parseInt(d.Response.Pages.Count);
-                        var nPages = Math.ceil(parseInt(d.Response.Pages.Total)/count);
-                        for (var p = 1; p < nPages; p++) {
-                            var start = p*100 + 1;
-                            var uri = `https://api.smugmug.com/api/v2/album/${album}!images?start=${start}&count=${count}&APIKey=${apikey}`;
-                            console.log(`album subpage fetch ${uri}`);
-                            uri = "https://corsproxy.io?" + encodeURIComponent(uri);
-                            fetch(uri, {
-                                headers: {"Accept": "application/json"}
-                            })
-                            .then(r => {
-                                r.json()
-                                .then(d => getPage(d));
+
+                // Library
+                function smuri(uri) {
+                    var apikey = "RCVHDGjcbc4Fhzq4qzqLdZmvwmwB6LM2";
+                    if (uri.includes("?"))
+                        uri += "&APIKey=" + apikey;
+                    else
+                        uri += "?APIKey=" + apikey;
+                    return uri;
+                    //return "https://corsproxy.io/?" + encodeURIComponent(uri);
+                }
+                function smfetch(uri) {
+                    uri = smuri(uri);
+                    $L(`Fetching ${uri}`);
+                    return fetch(uri, {
+                        headers: {
+                            "Accept": "application/json",
+                        },
+                    });
+                }
+                function smapi(rel) {
+                    return smfetch("https://api.smugmug.com/api/v2"+rel).then(r => r.json());
+                }
+
+                // Bookmarklets can only be 2048 bytes. Help the minifier out.
+                $d = document;
+                $b = $d.body;
+                $L = console.log;
+
+                $b.style.position = "relative";
+                function position (container, img, outer, x, y) {
+                    if (x > outer.innerWidth) {
+                        x = outer.innerWidth * 0.9;
+                        y = y * 0.9;
+                    }
+                    if (y > outer.innerHeight) {
+                        x = x * 0.9;
+                        y = outer.innerHeight * 0.9;
+                    }
+                    if (img.width + x > outer.innerWidth)
+                        x = outer.innerWidth - img.width;
+                    if (img.height + y > outer.innerHeight)
+                        y = outer.innerHeight - img.height;
+                    container.style.left = x + "px";
+                    container.style.top = y + "px";
+                    container.style.top = y + "px";
+                }
+                function mouseover (ev) {
+                    try { window.preview.remove(); } catch (ex) { true; };
+                    if (window.previewtimer) {
+                        clearTimeout(window.previewtimer);
+                        var delay = 1000;
+                    }
+                    else {
+                        // if no current timer show it immediately
+                        var delay = 0;
+                    }
+                    window.previewtimer = setTimeout(function () {
+$L("in");
+$L(ev);
+                        window.preview = $d.createElement("a");
+                        preview.img = $d.createElement("img");
+                        preview.appendChild(preview.img);
+                        preview.style.position = "fixed";
+                        smapi(`/image/${ev.target.sm_imagekey}!sizes`)
+                        .then(d => {
+                            preview.img.addEventListener("load", ev_load => {
+                                position(preview, preview.img, window, ev.screenX, ev.screenY);
+                                $b.appendChild(preview);
                             });
+                            preview.style.display = 'block';
+                            preview.href = d.Response.ImageSizes.LargestImageUrl;
+                            preview.img.style.borderTop = "3px solid white";
+                            preview.img.style.borderLeft = "3px solid white";
+                            preview.img.style.boxShadow = "10px 5px 5px #808080";
+                            preview.img.src = d.Response.ImageSizes.LargeImageUrl;
+                        });
+                    }, delay);
+                }
+                function mouseout (ev) {
+$L("out");
+                    window.preview.remove();
+                    if (window.previewtimer) {
+                        window.previewtimer = 0;
+                        clearTimeout(window.previewtimer);
+                    }
+                }
+
+                var url = new URL($d.querySelectorAll('link[type="application/rss+xml"]')[0].getAttribute('href'), window.location.href);
+                var album = url.searchParams.get('Data').split('_')[1];
+                var uri = `/album/${album}!images`;
+                $L(`album page fetch ${uri}`);
+                smapi(uri)
+                .then(d => {
+                    $L(d);
+                    $b.innerHTML = "";
+                    $b.style.margin = "3em";
+                    function getPage (d) {
+                        var images = d.Response.AlbumImage;
+                        for (var i = 0; i < images.length; i++) {
+                            var a = $d.createElement("a");
+                            var img = $d.createElement("img");
+                            img.sm_imagekey = images[i].ImageKey;
+$L(images[i]);
+                            img.src = images[i].ThumbnailUrl;
+                            img.addEventListener('mouseover', mouseover);
+                            img.addEventListener('mouseout', mouseout);
+                            a.href = images[i].WebUri;
+                            a.style.margin = '10px';
+                            a.appendChild(img);
+                            $b.appendChild(a);
                         }
-                    })
+                    }
+                    getPage(d);
+                    var count = parseInt(d.Response.Pages.Count);
+                    var nPages = Math.ceil(parseInt(d.Response.Pages.Total)/count);
+                    for (var p = 1; p < nPages; p++) {
+                        var start = p*100 + 1;
+                        var uri = `/album/${album}!images?start=${start}&count=${count}`;
+                        $L(`album subpage fetch ${uri}`);
+                        smapi(uri)
+                        .then(d => getPage(d));
+                    }
                 });
-            }),
+          }),
 
           _("right-click to copy URL",
             [
@@ -240,48 +324,116 @@
         }
         bookmarklets.sort((a, b) => strcmp(a.name, b.name));
 
+
+        // support functions for mondo compression
+        async function b64e(uint8) {
+            var data = await new Promise(r => {
+                fr = new FileReader();
+                fr.onload = () => r(fr.result);
+                fr.readAsDataURL(new Blob([uint8]));
+            });
+console.log(data);
+            return data.substr(data.indexOf(",")+1);
+        }
+        async function b64d(b64) {
+            var bstr = atob(b64);
+            var bytes = new Uint8Array(bstr.length);
+            for (var i = 0; i < bstr.length; i++)
+                bytes[i] = bstr.charCodeAt(i);
+            return bytes;
+        }
+        async function gzip (data) {
+            var cs = new CompressionStream('gzip');
+            var bytes = new TextEncoder().encode(data);
+            var w = cs.writable.getWriter();
+            w.write(bytes);
+            w.close();
+            return new Response(cs.readable).arrayBuffer();
+        }
+        async function gunzip (data) {
+            var ds = new DecompressionStream('gzip');
+            var w = ds.writable.getWriter();
+            w.write(data);
+            w.close();
+            data = await new Response(ds.readable).arrayBuffer();
+            return new TextDecoder().decode(data);
+        }
+        function builddecoder (b64) {
+            function mini (f) {
+                return (new Packer()).minify(f.toString());
+            }
+            code = (
+                "(async function () {" +
+                    gunzip.toString().replace("gunzip", "g") +
+                    b64d.toString().replace("b64d", "b") +
+                    `    var p = "${b64}";` +
+                    "    p = await b(p);" +
+                    "    p = await g(p);" +
+                    "return p;" +
+                "})().then(p=>{eval('('+p+')()')})"
+            );
+            code = mini(code);
+            return code;
+        }
+
+        async function minimize(text) {
+            // first try Packer
+            var code = (new Packer()).minify(text);
+            if (code.length < 2048)
+                return code;
+
+            // if still too long, try gzip
+            // this can fit more code into 2k but it requires a decoder
+            var data = await gzip(code);
+            b64 = await b64e(data);
+            console.log(b64);
+            console.log(b64.length);
+            d = builddecoder(b64);
+            console.log(d);
+            return d;
+        }
+
         function onload() {
-          var div = document.getElementById("bookmarklets");
-          for (var i = 0; i < bookmarklets.length; i++) {
-              var item = document.createElement("div");
-              item.className = "item";
-              //
-              var title = document.createElement("div");
-              title.className = "title";
-              //
-              var link = document.createElement("a");
-              link.className = "install";
-              var code = bookmarklets[i].code
-                         .replace(/^[\t ]+/mg, "")
-                         .replace(";\n", ";")
-                         .replace("\n", " ");
-              link.href = `javascript:(${code})();`;
-              link.innerHTML = bookmarklets[i].name;
-              title.appendChild(link);
-              item.appendChild(title);
-              //
-              var desc = document.createElement("p");
-              desc.className = "desc";
-              if (bookmarklets[i].desc instanceof Array)
-                  desc.innerHTML = ("<ul>" +
-                                    bookmarklets[i].desc.map(t => `<li>${t}</li>`).join("") +
-                                    "</ul>");
-              else
-                  desc.innerHTML = bookmarklets[i].desc;
-              item.appendChild(desc);
-              //
-              var pre = document.createElement("pre");
-              pre.innerHTML = js_beautify(bookmarklets[i].code, {
-                  "max_preserve_newlines": "2",
-                  "preserve_newlines": true,
-                  "break_chained_methods": true,
-                  "brace_style": "end-expand",
-                  "space_before_conditional": true,
-              });
-              item.appendChild(pre);
-              //
-              div.appendChild(item);
-          }
+            var div = document.getElementById("bookmarklets");
+            for (var i = 0; i < bookmarklets.length; i++) {
+                var item = document.createElement("div");
+                item.className = "item";
+                //
+                var title = document.createElement("div");
+                title.className = "title";
+                //
+                var link = document.createElement("a");
+                link.className = "install";
+                minimize(bookmarklets[i].code)
+                .then((function (link) {
+                    return code => { link.href = `javascript:(${code})();`; }
+                })(link));
+                link.innerHTML = bookmarklets[i].name;
+                title.appendChild(link);
+                item.appendChild(title);
+                //
+                var desc = document.createElement("p");
+                desc.className = "desc";
+                if (bookmarklets[i].desc instanceof Array)
+                    desc.innerHTML = ("<ul>" +
+                                      bookmarklets[i].desc.map(t => `<li>${t}</li>`).join("") +
+                                      "</ul>");
+                else
+                    desc.innerHTML = bookmarklets[i].desc;
+                item.appendChild(desc);
+                //
+                var pre = document.createElement("pre");
+                pre.innerHTML = js_beautify(bookmarklets[i].code, {
+                    "max_preserve_newlines": "2",
+                    "preserve_newlines": true,
+                    "break_chained_methods": true,
+                    "brace_style": "end-expand",
+                    "space_before_conditional": true,
+                });
+                item.appendChild(pre);
+                //
+                div.appendChild(item);
+            }
         }
     </script>
   </head>
