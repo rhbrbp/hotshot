@@ -208,8 +208,6 @@
                         var delay = 0;
                     }
                     window.previewtimer = setTimeout(function () {
-$L("in");
-$L(ev);
                         window.preview = $d.createElement("a");
                         preview.img = $d.createElement("img");
                         preview.appendChild(preview.img);
@@ -230,7 +228,6 @@ $L(ev);
                     }, delay);
                 }
                 function mouseout (ev) {
-$L("out");
                     window.preview.remove();
                     if (window.previewtimer) {
                         window.previewtimer = 0;
@@ -253,7 +250,6 @@ $L("out");
                             var a = $d.createElement("a");
                             var img = $d.createElement("img");
                             img.sm_imagekey = images[i].ImageKey;
-$L(images[i]);
                             img.src = images[i].ThumbnailUrl;
                             img.addEventListener('mouseover', mouseover);
                             img.addEventListener('mouseout', mouseout);
