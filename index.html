@@ -57,31 +57,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/javascript-packer@0.0.5/lib/index.min.js"></script>
     <script>
-        function _ (name, desc, f) {
-            return {
-                "name": name,
-                "desc": desc || name,
-                "code": f.toString(),
-                "exec": f,
-            };
-        }
         var bookmarklets = [
-            // define bookmarklets here
-            // example:
-            // _("bookmarklet name",
-            //   "description of bookmarklet",
-            //   function () {
-            //     /* function code to run as bookmarklet */
-            // });
+            // define bookmarklet functions here
 
-
-
-            _("autoscroll",
-              [
+            {
+              name: "autoscroll",
+              hotkey: "A",
+              desc: [
                 "continue scrolling to end of page to load more content",
                 "return to starting point at end",
               ],
-              function() {
+              exec: function() {
                 var screensPerSecond = .9;
                 var refreshRate = 1;
                 var lastY = 0;
@@ -94,12 +80,15 @@
                     };
                     lastY = window.scrollY;
                 }, 1000 / refreshRate);
-            }),
+              }
+            },
 
 
-            _("copy image urls",
-              "copy URLs from multiple selected images",
-              function () {
+            {
+              name: "copy image urls",
+              hotkey: "C",
+              desc: "copy URLs from multiple selected images",
+              exec: function () {
                 var copyText = (async (text) => { await navigator.clipboard.writeText(text); });
                 var sel = window.getSelection();
                 var a = document.querySelectorAll('a');
@@ -125,12 +114,15 @@
                         break;
                 };
                 copyText(txt);
-            }),
+              }
+            },
 
 
-            _("pagerip",
-              "copy all image links from page",
-              function () {
+            {
+              name: "pagerip",
+              hotkey: "R",
+              desc: "copy all image links from page",
+              exec: function () {
                 var smugsite = new URL(window.location.href).host;
                 smugsite = prompt('New smugsite:', smugsite);
                 if (!smugsite.includes('.'))
@@ -143,14 +135,17 @@
                 });
                 out = out.join("\n") + "\n";
                 setTimeout(() => {navigator.clipboard.writeText(out)}, 1000);
-            }),
+              }
+            },
 
 
             // this is a motherfucker
             // definitely shitty async, fixes welcome
-            _("lightbox",
-              "preview all images in this gallery",
-              function () {
+            {
+              name: "lightbox",
+              hotkey: "L",
+              desc: "preview all images in this gallery",
+              exec: function () {
 
                 // Library
                 function smuri(uri) {
@@ -176,9 +171,9 @@
                 }
 
                 // Bookmarklets can only be 2048 bytes. Help the minifier out.
-                $d = document;
-                $b = $d.body;
-                $L = console.log;
+                var $d = document;
+                var $b = $d.body;
+                var $L = console.log;
 
                 $b.style.position = "relative";
                 function position (container, img, outer, x, y) {
@@ -271,14 +266,17 @@
                         .then(d => getPage(d));
                     }
                 });
-          }),
+              }
+            },
 
-          _("right-click to copy URL",
-            [
-                "rewire right click to copy image URL",
-                "for galleries that block right click",
-            ],
-            function () {
+            {
+              name: "right-click to copy URL",
+              hotkey: null,
+              desc: [
+                  "rewire right click to copy image URL",
+                  "for galleries that block right click",
+              ],
+              exec: function () {
                 var copyText = async (text) => { await navigator.clipboard.writeText(text); };
                 var allLinks = document.querySelectorAll('a.sm-tile-content');
                 var evh = function(ev) {
@@ -288,12 +286,15 @@
                 for (var i = 0; i < allLinks.length; i++) {
                     allLinks[i].addEventListener('contextmenu', evh);
                 }
-              }),
+              }
+            },
 
 
-            _("search",
-              "search for highlighted text on SmugMug",
-              function () {
+            {
+              name: "search",
+              hotkey: "S",
+              desc: "search for highlighted text on SmugMug",
+              exec: function () {
                   if (window.getSelection)
                       sel = window.getSelection();
                   else if (document.getSelection)
@@ -309,16 +310,17 @@
                       sel = sel.substr(0, off);
                   var url = "https://www.smugmug.com/search#c=galleries&q=" + encodeURIComponent(sel);
                   window.open(url, "_blank");
-              }),
-      
+              },
+            },
 
-            ];
+        ];
 
         function strcmp (a, b) {
             return a < b ? -1 :
                    a > b ?  1 :
                    0
         }
+        bookmarklets.map(item => item.code = item.exec.toString());
         bookmarklets.sort((a, b) => strcmp(a.name, b.name));
 
 
@@ -329,7 +331,6 @@
                 fr.onload = () => r(fr.result);
                 fr.readAsDataURL(new Blob([uint8]));
             });
-console.log(data);
             return data.substr(data.indexOf(",")+1);
         }
         async function b64d(b64) {
@@ -383,10 +384,10 @@ console.log(data);
             // this can fit more code into 2k but it requires a decoder
             var data = await gzip(code);
             b64 = await b64e(data);
-            console.log(b64);
-            console.log(b64.length);
+            //console.log(b64);
+            //console.log(b64.length);
             d = builddecoder(b64);
-            console.log(d);
+            //console.log(d);
             return d;
         }
 
@@ -432,6 +433,132 @@ console.log(data);
                 div.appendChild(item);
             }
         }
+
+        var usprologue = `
+// ==UserScript==
+// @name         HotShot
+// @namespace    https://rhbrbp.github.io/hotshot/
+// @version      0.1
+// @description  SmugMug Macros
+// @author       rhbrbp
+// @match        https://*.smugmug.com/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=smugmug.com
+// @grant        none
+// ==/UserScript==
+
+
+(function() {
+    'use strict';
+    var modifierstate = 0;
+    var popup = null;
+
+    var css = document.createElement('style');
+    document.body.appendChild(css);
+    css.innerHTML = \`
+    div.shade {
+        background-color: rgba(0.5, 0.5, 0.5, 0.5);
+        border-radius: 1em;
+    }
+    div.tile {
+        float: left;
+        margin: 1em;
+        width: 8em;
+        height: 8em;
+        padding-top: 1em;
+        -display: flex;
+        -flex-direction: column;
+        -align-items: center;
+        -justify-content: center;
+    }
+    div.tile h1 {
+        text-align: center;
+        color: white;
+        padding: 0 0.5em 0 0.5em;
+        font-size: 200%;
+    }
+    div.tile p {
+        text-align: center;
+        color: white;
+        padding: 0.5em;
+    }
+    div.popup {
+        position: fixed;
+        top: 20%;
+        display: flex;
+        flex-wrap: wrap;
+        padding: 1em;
+    }
+\`;
+
+    function popupopen () {
+        if (popup)
+            popup.remove();
+        popup = document.createElement('div');
+        popup.className = 'popup shade';
+        var flex = document.createElement('div');
+        popup.appendChild(flex);
+        for (var i = 0; i < bookmarklets.length; i++) {
+            var tile = document.createElement('div');
+            tile.className = 'tile shade';
+            flex.appendChild(tile);
+            var h = document.createElement('h1');
+            if ('hotkey' in bookmarklets[i])
+                h.innerHTML = bookmarklets[i].hotkey;
+            else
+                h.innerHTML = i+1;
+            tile.appendChild(h);
+            var p = document.createElement('p');
+            p.innerHTML = bookmarklets[i].name;
+            tile.appendChild(p);
+        }
+        document.body.appendChild(popup);
+        console.log((window.innerWidth - popup.offsetWidth) / 2);
+        popup.style.left = "" + (window.innerWidth - popup.offsetWidth) / 2 + "px";
+    }
+
+    document.addEventListener('keydown', ev => {
+        console.log(ev);
+        modifierstate |= (ev.key == 'Control' ? 1 : ev.key == 'Meta' ? 2 : 0);
+        if (modifierstate == 3) {
+            modifierstate = 0;
+            return popupopen();
+        }
+        if ((ev.altKey + ev.shiftKey == 0) &&
+            (ev.metaKey + ev.ctrlKey == 2)) {
+            // ctrl-meta-something
+            var key = String.fromCharCode(ev.keyCode);
+            for (var i = 0; i < bookmarklets.length; i++) {
+                if (bookmarklets[i].hotkey == key) {
+                    console.log(bookmarklets[i]);
+                    eval('('+bookmarklets[i].code+')()');
+                    return;
+                }
+            }
+            if (ev.keyCode >= 48 && ev.keyCode < 58) {
+                var i = ev.keyCode - 48;
+                eval('('+bookmarklets[i-1].code+')()');
+                return;
+            }
+        }
+    });
+    document.addEventListener('keyup', ev => {
+        modifierstate &= ~(ev.key == 'Control' ? 1 : ev.key == 'Meta' ? 2 : 0);
+        if (popup) {
+            popup.remove();
+            popup = null;
+        }
+    });
+
+    var bookmarklets = `;
+        var usepilogue = `
+})();
+`;
+        function usinstall (a) {
+            var code = usprologue + JSON.stringify(bookmarklets) + usepilogue;
+            var blob = new Blob([code], {type: 'text/javascript'});
+            a.download = 'hotshot.user.js';
+            a.href = URL.createObjectURL(blob);
+        }
     </script>
   </head>
   <body>
@@ -450,6 +577,20 @@ console.log(data);
       a bookmarks folder.
     </p>
     <div id="bookmarklets" class="flex"></div>
+    <h2>Userscript</h2>
+    <p>
+      Or, instead you can install the tools as a
+      <a href="https://en.wikipedia.org/wiki/Userscript">Userscript</a>.
+      (You'll need a userscript manager to make these run: <a
+      href="https://www.tampermonkey.net/">Tampermonkey</a>, <a
+      href="https://www.greasespot.net/">Greasemonkey</a>, etc.)
+    </p>
+    <p>
+      <a id="usinstall">Download the userscript</a>, and install it. Reload
+      any SmugMug page (must be <code>*.smugmug.com</code>), then
+      press control+meta on any SmugMug page to see all the tools. Each
+      one shows a hotkey. Press control+meta+hotkey to execute the tool.
+    </p>
   </body>
-  <script>onload();</script>
+  <script>onload(); usinstall(document.getElementById('usinstall'));</script>
 </html>
