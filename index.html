@@ -238,7 +238,11 @@
                 smapi(uri)
                 .then(d => {
                     $L(d);
-                    $b.innerHTML = "";
+                    var $c = $b.children;
+                    for (var i=0; i < $c.length; i++) {
+                      if ($c[i].nodeName != "STYLE") // remove all child nodes except <style>
+                        $c[i].remove()
+                    };
                     $b.style.margin = "3em";
                     function getPage (d) {
                         var images = d.Response.AlbumImage;
