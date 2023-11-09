@@ -506,10 +506,10 @@
             tile.className = 'tile shade';
             flex.appendChild(tile);
             var h = document.createElement('h1');
-            if ('hotkey' in bookmarklets[i])
+            if ('hotkey' in bookmarklets[i] && bookmarklets[i].hotkey)
                 h.innerHTML = bookmarklets[i].hotkey;
             else
-                h.innerHTML = i+1;
+                h.innerHTML = "" + (i+1);
             tile.appendChild(h);
             var p = document.createElement('p');
             p.innerHTML = bookmarklets[i].name;
