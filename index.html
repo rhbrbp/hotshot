@@ -234,15 +234,17 @@
                 var url = new URL($d.querySelectorAll('link[type="application/rss+xml"]')[0].getAttribute('href'), window.location.href);
                 var album = url.searchParams.get('Data').split('_')[1];
                 var uri = `/album/${album}!images`;
+                function empty (r) {
+                    var styles = Array.from(r.getElementsByTagName("style"));
+                    styles.map(e => e.remove());
+                    r.innerHTML = "";
+                    styles.map(e => r.appendChild(e));
+                }
                 $L(`album page fetch ${uri}`);
                 smapi(uri)
                 .then(d => {
                     $L(d);
-                    var $c = $b.children;
-                    for (var i=0; i < $c.length; i++) {
-                      if ($c[i].nodeName != "STYLE") // remove all child nodes except <style>
-                        $c[i].remove()
-                    };
+                    empty($b);
                     $b.style.margin = "3em";
                     function getPage (d) {
                         var images = d.Response.AlbumImage;
