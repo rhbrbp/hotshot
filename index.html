@@ -281,7 +281,6 @@
                 $L(`album page fetch ${uri}`);
                 smapi(uri)
                 .then(d => {
-                    $L(d);
                     empty($b);
                     $b.style.margin = "3em";
                     function getPage (d) {
@@ -556,12 +555,10 @@
             tile.appendChild(p);
         }
         document.body.appendChild(popup);
-        console.log((window.innerWidth - popup.offsetWidth) / 2);
         popup.style.left = "" + (window.innerWidth - popup.offsetWidth) / 2 + "px";
     }
 
     document.addEventListener('keydown', ev => {
-        console.log(ev);
         modifierstate |= (ev.key == 'Control' ? 1 : ev.key == 'Meta' ? 2 : 0);
         if (modifierstate == 3) {
             modifierstate = 0;
@@ -573,7 +570,6 @@
             var key = String.fromCharCode(ev.keyCode);
             for (var i = 0; i < bookmarklets.length; i++) {
                 if (bookmarklets[i].hotkey == key) {
-                    console.log(bookmarklets[i]);
                     eval('('+bookmarklets[i].code+')()');
                     return;
                 }
