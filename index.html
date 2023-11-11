@@ -91,24 +91,24 @@
               exec: function () {
                 var copyText = (async (text) => { await navigator.clipboard.writeText(text); });
                 var sel = window.getSelection();
-                var a = document.querySelectorAll('a');
+                var a = document.querySelectorAll("a");
                 var txt = "";
                 for (var i = 0; i < a.length; i++) {
                     if (a[i]==sel.anchorNode)
                         break;
                 }
                 for (; i < a.length; i++) {
-                    if (a[i].href == '#') {
-                        var img = a[i].querySelector('img');
+                    if (a[i].href == "#") {
+                        var img = a[i].querySelector("img");
                         var imgurl = img.src;
                         // this bit is specific to SM
-                        var _ = imgurl.split('/');
+                        var _ = imgurl.split("/");
                         var size = _[_.length-2];
-                        imgurl = imgurl.replace('/'+size+'/', '/O/').replace('-'+size, '-O');
+                        imgurl = imgurl.replace("/"+size+"/", "/O/").replace("-"+size, "-O");
                         txt += imgurl + "\n";
                     }
                     else {
-                        txt += a[i].href + '\n';
+                        txt += a[i].href + "\n";
                     }
                     if (a[i] == sel.focusNode)
                         break;
@@ -241,8 +241,8 @@
                             });
                             preview.style.display = 'block';
                             preview.href = d.Response.ImageSizes.LargestImageUrl;
-                            preview.img.style.borderTop = "3px solid white";
-                            preview.img.style.borderLeft = "3px solid white";
+                            preview.img.style.borderTop = "3px solid rgba(0.5, 0.5, 0.5, 0.5)";
+                            preview.img.style.borderLeft = "3px solid rgba(0.5, 0.5, 0.5, 0.5)";
                             preview.img.style.boxShadow = "10px 5px 5px #808080";
                             preview.img.src = d.Response.ImageSizes.LargeImageUrl;
                         });
@@ -259,15 +259,15 @@
                 function getalbumid(d) {
                     try {
                         var url = d.querySelectorAll('link[type="application/rss+xml"]')[0]
-                                  .getAttribute('href');
+                                  .getAttribute("href");
                         url = new URL(url, window.location.href);
-                        return url.searchParams.get('Data').split('_')[1];
+                        return url.searchParams.get("Data").split("_")[1];
                     }
                     catch(e) {
                         return d.querySelectorAll(
                             'form[action="/search/"] input[name="scopeValue"]'
                         )[0]
-                        .getAttribute('value').split('_')[1];
+                        .getAttribute("value").split("_")[1];
                     }
                 }
                 var album = getalbumid($d);
@@ -292,22 +292,23 @@
 console.log(base, i, base+i);
                             var a = document.getElementById(`lightbox_${base+i}`);
                             var img = a.children[0];
-                            img.style.width = img.style.height = img.style.border = '';
+                            img.style.width = img.style.height = img.style.border = "";
                             img.sm_imagekey = images[i].ImageKey;
                             img.src = images[i].ThumbnailUrl;
-                            img.addEventListener('mouseover', mouseover);
-                            img.addEventListener('mouseout', mouseout);
+                            img.addEventListener("mouseover", mouseover);
+                            img.addEventListener("mouseout", mouseout);
                             a.href = images[i].WebUri;
                         }
                     }
                     for (var i = 0; i < total; i++) {
                         var a = $d.createElement("a");
                         var img = $d.createElement("img");
-                        img.style.backgroundColor = 'rgba(0.5, 0.5, 0.5, 0.5)';
+                        img.style.margin = "1px";
+                        img.style.backgroundColor = "rgba(0.5, 0.5, 0.5, 0.5)";
                         a.id = `lightbox_${i}`;
-                        a.style.margin = '10px';
-                        img.style.border = '1px solid #d0d0d0';
-                        img.style.width = img.style.height = '150px';
+                        a.style.margin = "10px";
+                        img.style.border = "1px solid #d0d0d0";
+                        img.style.width = img.style.height = "150px";
                         a.appendChild(img);
                         $b.appendChild(a);
                     }
@@ -332,13 +333,13 @@ console.log(base, i, base+i);
               ],
               exec: function () {
                 var copyText = async (text) => { await navigator.clipboard.writeText(text); };
-                var allLinks = document.querySelectorAll('a.sm-tile-content');
+                var allLinks = document.querySelectorAll("a.sm-tile-content");
                 var evh = function(ev) {
                     copyText(ev.target.offsetParent.href);
                     ev.preventDefault();
                 };
                 for (var i = 0; i < allLinks.length; i++) {
-                    allLinks[i].addEventListener('contextmenu', evh);
+                    allLinks[i].addEventListener("contextmenu", evh);
                 }
               }
             },
@@ -395,7 +396,7 @@ console.log(base, i, base+i);
             return bytes;
         }
         async function gzip (data) {
-            var cs = new CompressionStream('gzip');
+            var cs = new CompressionStream("gzip");
             var bytes = new TextEncoder().encode(data);
             var w = cs.writable.getWriter();
             w.write(bytes);
@@ -403,7 +404,7 @@ console.log(base, i, base+i);
             return new Response(cs.readable).arrayBuffer();
         }
         async function gunzip (data) {
-            var ds = new DecompressionStream('gzip');
+            var ds = new DecompressionStream("gzip");
             var w = ds.writable.getWriter();
             w.write(data);
             w.close();
@@ -506,7 +507,7 @@ console.log(base, i, base+i);
     var modifierstate = 0;
     var popup = null;
 
-    var css = document.createElement('style');
+    var css = document.createElement("style");
     document.body.appendChild(css);
     css.innerHTML = \`
     div.shade {
@@ -547,21 +548,21 @@ console.log(base, i, base+i);
     function popupopen () {
         if (popup)
             popup.remove();
-        popup = document.createElement('div');
-        popup.className = 'popup shade';
-        var flex = document.createElement('div');
+        popup = document.createElement("div");
+        popup.className = "popup shade";
+        var flex = document.createElement("div");
         popup.appendChild(flex);
         for (var i = 0; i < bookmarklets.length; i++) {
-            var tile = document.createElement('div');
-            tile.className = 'tile shade';
+            var tile = document.createElement("div");
+            tile.className = "tile shade";
             flex.appendChild(tile);
-            var h = document.createElement('h1');
-            if ('hotkey' in bookmarklets[i] && bookmarklets[i].hotkey)
+            var h = document.createElement("h1");
+            if ("hotkey" in bookmarklets[i] && bookmarklets[i].hotkey)
                 h.innerHTML = bookmarklets[i].hotkey;
             else
                 h.innerHTML = "" + (i+1);
             tile.appendChild(h);
-            var p = document.createElement('p');
+            var p = document.createElement("p");
             p.innerHTML = bookmarklets[i].name;
             tile.appendChild(p);
         }
@@ -569,8 +570,8 @@ console.log(base, i, base+i);
         popup.style.left = "" + (window.innerWidth - popup.offsetWidth) / 2 + "px";
     }
 
-    document.addEventListener('keydown', ev => {
-        modifierstate |= (ev.key == 'Control' ? 1 : ev.key == 'Meta' ? 2 : 0);
+    document.addEventListener("keydown", ev => {
+        modifierstate |= (ev.key == "Control" ? 1 : ev.key == "Meta" ? 2 : 0);
         if (modifierstate == 3) {
             modifierstate = 0;
             return popupopen();
@@ -581,19 +582,19 @@ console.log(base, i, base+i);
             var key = String.fromCharCode(ev.keyCode);
             for (var i = 0; i < bookmarklets.length; i++) {
                 if (bookmarklets[i].hotkey == key) {
-                    eval('('+bookmarklets[i].code+')()');
+                    eval("("+bookmarklets[i].code+")()");
                     return;
                 }
             }
             if (ev.keyCode >= 48 && ev.keyCode < 58) {
                 var i = ev.keyCode - 48;
-                eval('('+bookmarklets[i-1].code+')()');
+                eval("("+bookmarklets[i-1].code+")()");
                 return;
             }
         }
     });
-    document.addEventListener('keyup', ev => {
-        modifierstate &= ~(ev.key == 'Control' ? 1 : ev.key == 'Meta' ? 2 : 0);
+    document.addEventListener("keyup", ev => {
+        modifierstate &= ~(ev.key == "Control" ? 1 : ev.key == "Meta" ? 2 : 0);
         if (popup) {
             popup.remove();
             popup = null;
@@ -606,8 +607,8 @@ console.log(base, i, base+i);
 `;
         function usinstall (a) {
             var code = usprologue + JSON.stringify(bookmarklets) + usepilogue;
-            var blob = new Blob([code], {type: 'text/javascript'});
-            a.download = 'hotshot.user.js';
+            var blob = new Blob([code], {type: "text/javascript"});
+            a.download = "hotshot.user.js";
             a.href = URL.createObjectURL(blob);
         }
     </script>
@@ -654,5 +655,5 @@ console.log(base, i, base+i);
       version.
     </p>
   </body>
-  <script>onload(); usinstall(document.getElementById('usinstall'));</script>
+  <script>onload(); usinstall(document.getElementById("usinstall"));</script>
 </html>
