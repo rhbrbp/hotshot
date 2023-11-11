@@ -281,32 +281,43 @@
                 $L(`album page fetch ${uri}`);
                 smapi(uri)
                 .then(d => {
+                    var count = parseInt(d.Response.Pages.Count);
+                    var total = parseInt(d.Response.Pages.Total);
+                    var nPages = Math.ceil(total/count);
                     empty($b);
                     $b.style.margin = "3em";
-                    function getPage (d) {
+                    function getPage (d, base) {
                         var images = d.Response.AlbumImage;
                         for (var i = 0; i < images.length; i++) {
-                            var a = $d.createElement("a");
-                            var img = $d.createElement("img");
+console.log(base, i, base+i);
+                            var a = document.getElementById(`lightbox_${base+i}`);
+                            var img = a.children[0];
+                            img.style.width = img.style.height = img.style.border = '';
                             img.sm_imagekey = images[i].ImageKey;
                             img.src = images[i].ThumbnailUrl;
                             img.addEventListener('mouseover', mouseover);
                             img.addEventListener('mouseout', mouseout);
                             a.href = images[i].WebUri;
-                            a.style.margin = '10px';
-                            a.appendChild(img);
-                            $b.appendChild(a);
                         }
                     }
-                    getPage(d);
-                    var count = parseInt(d.Response.Pages.Count);
-                    var nPages = Math.ceil(parseInt(d.Response.Pages.Total)/count);
+                    for (var i = 0; i < total; i++) {
+                        var a = $d.createElement("a");
+                        var img = $d.createElement("img");
+                        img.style.backgroundColor = 'rgba(0.5, 0.5, 0.5, 0.5)';
+                        a.id = `lightbox_${i}`;
+                        a.style.margin = '10px';
+                        img.style.border = '1px solid #d0d0d0';
+                        img.style.width = img.style.height = '150px';
+                        a.appendChild(img);
+                        $b.appendChild(a);
+                    }
+                    getPage(d, 0);
                     for (var p = 1; p < nPages; p++) {
-                        var start = p*100 + 1;
-                        var uri = `/album/${album}!images?start=${start}&count=${count}`;
+                        var start = p*count;
+                        var uri = `/album/${album}!images?start=${start+1}&count=${count}`;
                         $L(`album subpage fetch ${uri}`);
                         smapi(uri)
-                        .then(d => getPage(d));
+                        .then(d => getPage(d, start));
                     }
                 });
               }
