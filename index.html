@@ -289,7 +289,6 @@
                     function getPage (d, base) {
                         var images = d.Response.AlbumImage;
                         for (var i = 0; i < images.length; i++) {
-console.log(base, i, base+i);
                             var a = document.getElementById(`lightbox_${base+i}`);
                             var img = a.children[0];
                             img.style.width = img.style.height = img.style.border = "";
@@ -314,11 +313,13 @@ console.log(base, i, base+i);
                     }
                     getPage(d, 0);
                     for (var p = 1; p < nPages; p++) {
-                        var start = p*count;
-                        var uri = `/album/${album}!images?start=${start+1}&count=${count}`;
-                        $L(`album subpage fetch ${uri}`);
-                        smapi(uri)
-                        .then(d => getPage(d, start));
+                        (function () {
+                            var start = p*count;
+                            var uri = `/album/${album}!images?start=${start+1}&count=${count}`;
+                            $L(`album subpage fetch ${uri}`);
+                            smapi(uri)
+                            .then(d => getPage(d, start));
+                        })();
                     }
                 });
               }
