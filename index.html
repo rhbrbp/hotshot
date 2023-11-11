@@ -119,6 +119,31 @@
 
 
             {
+              name: "get album id",
+              hotkey: "I",
+              desc: "find the album ID of the current page",
+              exec: function () {
+                function getalbumid(d) {
+                    try {
+                        var url = d.querySelectorAll('link[type="application/rss+xml"]')[0]
+                                  .getAttribute('href');
+                        url = new URL(url, window.location.href);
+                        return url.searchParams.get('Data').split('_')[1];
+                    }
+                    catch(e) {
+                        return d.querySelectorAll(
+                            'form[action="/search/"] input[name="scopeValue"]'
+                        )[0]
+                        .getAttribute('value').split('_')[1];
+                    }
+                }
+                var album = getalbumid(document);
+                prompt('Album ID:', album);
+              },
+            },
+
+
+            {
               name: "pagerip",
               hotkey: "R",
               desc: "copy all image links from page",
@@ -231,8 +256,21 @@
                     }
                 }
 
-                var url = new URL($d.querySelectorAll('link[type="application/rss+xml"]')[0].getAttribute('href'), window.location.href);
-                var album = url.searchParams.get('Data').split('_')[1];
+                function getalbumid(d) {
+                    try {
+                        var url = d.querySelectorAll('link[type="application/rss+xml"]')[0]
+                                  .getAttribute('href');
+                        url = new URL(url, window.location.href);
+                        return url.searchParams.get('Data').split('_')[1];
+                    }
+                    catch(e) {
+                        return d.querySelectorAll(
+                            'form[action="/search/"] input[name="scopeValue"]'
+                        )[0]
+                        .getAttribute('value').split('_')[1];
+                    }
+                }
+                var album = getalbumid($d);
                 var uri = `/album/${album}!images`;
                 function empty (r) {
                     var styles = Array.from(r.getElementsByTagName("style"));
