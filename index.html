@@ -400,6 +400,7 @@
               hotkey: "S",
               desc: "search for highlighted text on SmugMug",
               exec: function () {
+                  var sel = "";
                   if (window.getSelection)
                       sel = window.getSelection();
                   else if (document.getSelection)
