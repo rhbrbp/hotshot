@@ -85,6 +85,55 @@
 
 
             {
+              name: "open in API",
+              hotkey: ";",
+              desc: "look for smugmug objects in URL and open them in the api browser",
+              exec: function () {
+                function _search(s) {
+                    // prefer substrings with / in them over those without
+                    if (s.includes("/i-")) {
+                        return ["image", s.indexOf("/i-") + 3];
+                    }
+                    if (s.includes("/n-")) {
+                        return ["node", s.indexOf("/n-") + 3];
+                    }
+                    if (s.includes("i-")) {
+                        return ["image", s.indexOf("i-") + 2];
+                    }
+                    if (s.includes("n-")) {
+                        return ["node", s.indexOf("n-") + 2];
+                    }
+                    return null;
+                }
+                function search(s) {
+                    s = "" + s;
+                    var r = _search(s);
+                    if (!r)
+                        return null;
+                    s = s.substr(r[1]);
+                    var off = s.indexOf("/");
+                    if (off > -1)
+                        s = s.substr(0, off);
+                    return "https://api.smugmug.com/api/v2/"+r[0]+"/"+s;
+                }
+                var url = search(window.location.href);
+                if (!url) {
+                    if (window.getSelection)
+                        sel = window.getSelection();
+                    else if (document.getSelection)
+                        sel = document.getSelection();
+                    else if (document.selection)
+                        sel = document.selection.createRange().text;
+                    url = search(sel);
+                }
+                console.log(`located ${url}`);
+                if (!url)
+                    return;
+                window.open(url, "_blank");
+              }
+            },
+
+            {
               name: "copy image urls",
               hotkey: "C",
               desc: "copy URLs from multiple selected images",
