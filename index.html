@@ -103,7 +103,7 @@
                     if (s.includes("n-")) {
                         return ["node", s.indexOf("n-") + 2];
                     }
-                    return null;
+                    return ["image", 0];
                 }
                 function search(s) {
                     s = "" + s;
@@ -116,16 +116,16 @@
                         s = s.substr(0, off);
                     return "https://api.smugmug.com/api/v2/"+r[0]+"/"+s;
                 }
-                var url = search(window.location.href);
-                if (!url) {
-                    if (window.getSelection)
-                        sel = window.getSelection();
-                    else if (document.getSelection)
-                        sel = document.getSelection();
-                    else if (document.selection)
-                        sel = document.selection.createRange().text;
-                    url = search(sel);
-                }
+                var sel = "";
+                if (window.getSelection)
+                    sel = window.getSelection();
+                else if (document.getSelection)
+                    sel = document.getSelection();
+                else if (document.selection)
+                    sel = document.selection.createRange().text;
+                if (!sel)
+                    sel = window.location.href;
+                url = search(sel);
                 console.log(`located ${url}`);
                 if (!url)
                     return;
