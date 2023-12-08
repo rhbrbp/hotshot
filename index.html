@@ -250,6 +250,7 @@
                 var $L = console.log;
 
                 $b.style.position = "relative";
+
                 function position (container, img, outer, x, y) {
                     if (x > outer.innerWidth) {
                         x = outer.innerWidth * 0.9;
@@ -268,6 +269,8 @@
                     container.style.top = y + "px";
                 }
                 function mouseover (ev) {
+                    if ($d.getElementById('enablePreview').checked == false)
+                        return;
                     try { window.preview.remove(); } catch (ex) { true; };
                     if (window.previewtimer) {
                         clearTimeout(window.previewtimer);
@@ -298,12 +301,13 @@
                     }, delay);
                 }
                 function mouseout (ev) {
-                    window.preview.remove();
                     if (window.previewtimer) {
                         window.previewtimer = 0;
                         clearTimeout(window.previewtimer);
                     }
+                    try { window.preview.remove(); } catch (ex) { true; };
                 }
+                $b.addEventListener("mouseover", mouseout);
 
                 function getalbumid(d) {
                     try {
@@ -334,6 +338,14 @@
                     var total = parseInt(d.Response.Pages.Total);
                     var nPages = Math.ceil(total/count);
                     empty($b);
+                    var cb = $d.createElement('input');
+                    cb.id = 'enablePreview';
+                    cb.type = 'checkbox';
+                    cb.style.position = 'absolute';
+                    cb.style.top = '0px';
+                    cb.style.right = '0px';
+                    cb.checked = true;
+                    $b.appendChild(cb);
                     $b.style.margin = "3em";
                     function getPage (d, base) {
                         var images = d.Response.AlbumImage;
