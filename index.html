@@ -86,7 +86,7 @@
 
             {
               name: "open in API",
-              hotkey: "P",
+              hotkey: "(",
               desc: "look for smugmug objects in URL and open them in the api browser",
               exec: function () {
                 function _search(s) {
@@ -116,15 +116,18 @@
                         s = s.substr(0, off);
                     return "https://api.smugmug.com/api/v2/"+r[0]+"/"+s;
                 }
-                var sel = "";
-                if (window.getSelection)
-                    sel = window.getSelection();
-                else if (document.getSelection)
-                    sel = document.getSelection();
-                else if (document.selection)
-                    sel = document.selection.createRange().text;
-                if (!sel)
-                    sel = window.location.href;
+                function getSel() {
+                    if (window.getSelection)
+                        sel = window.getSelection();
+                    else if (document.getSelection)
+                        sel = document.getSelection();
+                    else if (document.selection)
+                        sel = document.selection.createRange().text;
+                    else
+                        sel = window.location.href;
+                    return "" + sel;
+                }
+                var sel = getSel();
                 url = search(sel);
                 console.log(`located ${url}`);
                 if (!url)
@@ -209,6 +212,66 @@
                 });
                 out = out.join("\n") + "\n";
                 setTimeout(() => {navigator.clipboard.writeText(out)}, 1000);
+              }
+            },
+
+
+            {
+              name: "O trick",
+              hotkey: "O",
+              desc: "try to get folder path from photo URL",
+              exec: function () {
+                function getSel() {
+                    sel = "";
+                    if (window.getSelection)
+                        sel = window.getSelection();
+                    else if (document.getSelection)
+                        sel = document.getSelection();
+                    else if (document.selection)
+                        sel = document.selection.createRange().text;
+                    sel = ""+sel;
+                    if (sel=="")
+                        sel = window.location.href;
+                    return "" + sel;
+                }
+                var sel = getSel();
+                var split = sel.split('/');
+                split[split.length-2] = 'O';
+                window.location.href = split.join('/');
+              }
+            },
+
+
+            {
+              name: "path search",
+              hotkey: "P",
+              desc: [
+                "extract path terms from URL and search for them",
+                "useful after the O trick",
+              ],
+              exec: function () {
+                function getSel() {
+                    sel = "";
+                    if (window.getSelection)
+                        sel = window.getSelection();
+                    else if (document.getSelection)
+                        sel = document.getSelection();
+                    else if (document.selection)
+                        sel = document.selection.createRange().text;
+                    sel = ""+sel;
+                    if (sel=="")
+                        sel = window.location.href;
+                    return "" + sel;
+                }
+                var sel = getSel();
+                var cut = sel.indexOf('/i-');
+                var sel = sel.substring(0, cut);
+                var split = sel.split('/');
+                split = split.slice(3);
+                var search = split.join(' ');
+                search = search.replace(/[^\w\s\']|_/g, " ").replace(/\s+/, " ");
+                var url = "https://www.smugmug.com/search#c=galleries&q=" + encodeURIComponent(search);
+                window.open(url, "_blank");
               }
             },
 
@@ -442,7 +505,7 @@
                    0
         }
         bookmarklets.map(item => item.code = item.exec.toString());
-        bookmarklets.sort((a, b) => strcmp(a.name, b.name));
+        bookmarklets.sort((a, b) => strcmp(a.name.toLowerCase(), b.name.toLowerCase()));
 
 
         // support functions for mondo compression
