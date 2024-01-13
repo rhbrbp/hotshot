@@ -508,11 +508,15 @@
                   }
                   var sel = getSel();
                   var off = sel.indexOf("i-");
-                  if (off > -1)
+                  if (off > -1) {
                       sel = sel.substr(off+2);
-                  off = sel.indexOf("/");
-                  if (off > -1)
-                      sel = sel.substr(0, off);
+                      off = sel.indexOf("/");
+                      if (off > -1)
+                          sel = sel.substr(0, off);
+                  }
+                  else {
+                      sel = sel.replace(/[^\w\s\']|_/g, " ").replace(/\s+/, " ");
+                  }
                   var url = "https://www.smugmug.com/search#c=galleries&q=" + encodeURIComponent(sel);
                   window.open(url, "_blank");
               },
