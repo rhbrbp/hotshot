@@ -116,14 +116,16 @@
                         s = s.substr(0, off);
                     return "https://api.smugmug.com/api/v2/"+r[0]+"/"+s;
                 }
-                function getSel() {
+                function getSel(fallback) {
+                    sel = "";
                     if (window.getSelection)
                         sel = window.getSelection();
                     else if (document.getSelection)
                         sel = document.getSelection();
                     else if (document.selection)
                         sel = document.selection.createRange().text;
-                    else
+                    sel = ""+sel;
+                    if (sel=="" && fallback)
                         sel = window.location.href;
                     return "" + sel;
                 }
@@ -142,7 +144,20 @@
               desc: "copy URLs from multiple selected images",
               exec: function () {
                 var copyText = (async (text) => { await navigator.clipboard.writeText(text); });
-                var sel = window.getSelection();
+                function getSel(fallback) {
+                    sel = "";
+                    if (window.getSelection)
+                        sel = window.getSelection();
+                    else if (document.getSelection)
+                        sel = document.getSelection();
+                    else if (document.selection)
+                        sel = document.selection.createRange().text;
+                    sel = ""+sel;
+                    if (sel=="" && fallback)
+                        sel = window.location.href;
+                    return "" + sel;
+                }
+                var sel = getSel();
                 var a = document.querySelectorAll("a");
                 var txt = "";
                 for (var i = 0; i < a.length; i++) {
@@ -221,7 +236,7 @@
               hotkey: "O",
               desc: "try to get folder path from photo URL",
               exec: function () {
-                function getSel() {
+                function getSel(fallback) {
                     sel = "";
                     if (window.getSelection)
                         sel = window.getSelection();
@@ -230,11 +245,11 @@
                     else if (document.selection)
                         sel = document.selection.createRange().text;
                     sel = ""+sel;
-                    if (sel=="")
+                    if (sel=="" && fallback)
                         sel = window.location.href;
                     return "" + sel;
                 }
-                var sel = getSel();
+                var sel = getSel(true);
                 var split = sel.split('/');
                 split[split.length-2] = 'O';
                 window.location.href = split.join('/');
@@ -250,7 +265,7 @@
                 "useful after the O trick",
               ],
               exec: function () {
-                function getSel() {
+                function getSel(fallback) {
                     sel = "";
                     if (window.getSelection)
                         sel = window.getSelection();
@@ -259,11 +274,11 @@
                     else if (document.selection)
                         sel = document.selection.createRange().text;
                     sel = ""+sel;
-                    if (sel=="")
+                    if (sel=="" && fallback)
                         sel = window.location.href;
                     return "" + sel;
                 }
-                var sel = getSel();
+                var sel = getSel(true);
                 var cut = sel.indexOf('/i-');
                 var sel = sel.substring(0, cut);
                 var split = sel.split('/');
@@ -478,14 +493,20 @@
               hotkey: "S",
               desc: "search for highlighted text on SmugMug",
               exec: function () {
-                  var sel = "";
-                  if (window.getSelection)
-                      sel = window.getSelection();
-                  else if (document.getSelection)
-                      sel = document.getSelection();
-                  else if (document.selection)
-                      sel = document.selection.createRange().text;
-                  sel = "" + sel;
+                  function getSel(fallback) {
+                      sel = "";
+                      if (window.getSelection)
+                          sel = window.getSelection();
+                      else if (document.getSelection)
+                          sel = document.getSelection();
+                      else if (document.selection)
+                          sel = document.selection.createRange().text;
+                      sel = ""+sel;
+                      if (sel=="" && fallback)
+                          sel = window.location.href;
+                      return "" + sel;
+                  }
+                  var sel = getSel();
                   var off = sel.indexOf("i-");
                   if (off > -1)
                       sel = sel.substr(off+2);
