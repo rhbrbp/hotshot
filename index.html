@@ -144,20 +144,7 @@
               desc: "copy URLs from multiple selected images",
               exec: function () {
                 var copyText = (async (text) => { await navigator.clipboard.writeText(text); });
-                function getSel(fallback) {
-                    sel = "";
-                    if (window.getSelection)
-                        sel = window.getSelection();
-                    else if (document.getSelection)
-                        sel = document.getSelection();
-                    else if (document.selection)
-                        sel = document.selection.createRange().text;
-                    sel = ""+sel;
-                    if (sel=="" && fallback)
-                        sel = window.location.href;
-                    return "" + sel;
-                }
-                var sel = getSel();
+                var sel = window.getSelection();
                 var a = document.querySelectorAll("a");
                 var txt = "";
                 for (var i = 0; i < a.length; i++) {
