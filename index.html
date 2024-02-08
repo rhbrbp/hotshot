@@ -403,6 +403,23 @@
                     var total = parseInt(d.Response.Pages.Total);
                     var nPages = Math.ceil(total/count);
                     empty($b);
+                    var style = $d.createElement('style');
+                    $b.appendChild(style);
+                    style.innerHTML = '.found { border: 2px solid #8080f0; }';
+                    $b.addEventListener("keypress", function (ev) {
+                        if (ev.key == '/') {
+                            var id = window.prompt("Enter the imagekey to search for:");
+                            if (id.substr(0, 2) == 'i-')
+                                id = id.substr(2);
+                            console.log(id);
+                            var found = document.getElementById(id);
+                            if (found) {
+                                found = found.firstChild; //img
+                                found.className += ' found';
+                                found.scrollIntoView();
+                            }
+                        }
+                    });
                     var cbdiv = $d.createElement('div');
                     cbdiv.innerHTML = 'previews: ';
                     cbdiv.style.position = 'fixed';
@@ -415,13 +432,18 @@
                     cbdiv.appendChild(cb);
                     $b.appendChild(cbdiv);
                     $b.style.margin = "3em";
+                    var allA = [];
                     function getPage (d, base) {
                         var images = d.Response.AlbumImage;
                         for (var i = 0; i < images.length; i++) {
-                            var a = document.getElementById(`lightbox_${base+i}`);
+                            //var a = document.getElementById(`lightbox_${base+i}`);
+                            var a = allA[base+i];
                             var img = a.children[0];
                             img.style.width = img.style.height = img.style.border = "";
-                            img.sm_imagekey = images[i].ImageKey;
+                            a.id = img.sm_imagekey = images[i].ImageKey;
+                            if (images[i].IsVideo) {
+                                a.lastChild.innerHTML = '▶︎';    // div
+                            }
                             img.src = images[i].ThumbnailUrl;
                             img.addEventListener("mouseover", mouseover);
                             img.addEventListener("mouseout", mouseout);
@@ -430,15 +452,23 @@
                     }
                     for (var i = 0; i < total; i++) {
                         var a = $d.createElement("a");
+                        a.style.position = "relative";
                         var img = $d.createElement("img");
+                        var div = $d.createElement("div");
+                        div.style.position = 'absolute';
+                        div.style.left = '0';
+                        div.style.bottom = '0';
+                        div.style.padding = '2px';
                         img.style.margin = "1px";
                         img.style.backgroundColor = "rgba(0.5, 0.5, 0.5, 0.5)";
-                        a.id = `lightbox_${i}`;
+                        //a.id = `lightbox_${i}`;
                         a.style.margin = "10px";
                         img.style.border = "1px solid #d0d0d0";
-                        img.style.width = img.style.height = "150px";
+                        img.style.width = img.style.height = div.style.width = "150px";
                         a.appendChild(img);
+                        a.appendChild(div);
                         $b.appendChild(a);
+                        allA.push(a);
                     }
                     getPage(d, 0);
                     for (var p = 1; p < nPages; p++) {
