@@ -484,6 +484,7 @@
               }
             },
 
+
             {
               name: "right-click to copy URL",
               hotkey: null,
@@ -710,9 +711,12 @@
     div.popup {
         position: fixed;
         top: 20%;
+        min-width: 50em;
+        max-width: 50em;
         display: flex;
         flex-wrap: wrap;
         padding: 1em;
+        border: 1px solid #a0a0a0;
     }
 \`;
 
@@ -771,6 +775,48 @@
             popup = null;
         }
     });
+
+    // wire meta-right to copy image url for all image tiles
+    (function () {
+        var mouseX = 0, mouseY = 0;
+        var meta = false;
+        var copyText = async (text) => { await navigator.clipboard.writeText(text); };
+
+        document.addEventListener('mousemove', (ev) => {
+            mouseX = ev.pageX;
+            mouseY = ev.pageY;
+        });
+        document.addEventListener("keydown", ev => {
+            if (ev.key == "Meta") {
+                meta = true;
+            }
+        });
+        document.addEventListener("keyup", ev => {
+            if (ev.key == "Meta") {
+                meta = false;
+            }
+        });
+        document.addEventListener('contextmenu', (ev) => {
+            if (!meta)
+                return;
+            var node = document.elementFromPoint(
+                mouseX-window.pageXOffset,
+                mouseY-window.pageYOffset
+            );
+            for (; node; node = node.parentNode) {
+                if (node.tagName == 'A' && node.className.includes('sm-tile-content')) {
+                    break;
+                }
+            }
+            if (node && node.href) {
+                console.log(node);
+                copyText(node.href);
+                ev.preventDefault();
+                return false;
+            }
+            return true;
+        });
+    })();
 
     var bookmarklets = `;
         var usepilogue = `
