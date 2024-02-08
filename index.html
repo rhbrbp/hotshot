@@ -816,6 +816,15 @@
             }
             return true;
         });
+        document.addEventListener('auxclick', (ev) => {
+            if (!meta)
+                return;
+            if (ev.button != 1)  // middle mouse mutton
+                return;
+            copyText(window.location.href);
+            ev.preventDefault();
+            return;
+        });
     })();
 
     var bookmarklets = `;
