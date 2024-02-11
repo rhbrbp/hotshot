@@ -147,11 +147,23 @@
                 var sel = window.getSelection();
                 var a = document.querySelectorAll("a");
                 var txt = "";
+                var start = null, end = null;
                 for (var i = 0; i < a.length; i++) {
                     if (a[i]==sel.anchorNode)
-                        break;
+                        start = i;
+                    if (a[i]==sel.focusNode)
+                        end = i;
                 }
-                for (; i < a.length; i++) {
+
+                // reverse range if backwards
+                if (end < start) {
+                    var tmp = start;
+                    start = end;
+                    end = tmp;
+                    end--;      // start node is off by one going backwards
+                }
+
+                for (i = start; i <= end && i < a.length; i++) {
                     if (a[i].href == "#") {
                         var img = a[i].querySelector("img");
                         var imgurl = img.src;
@@ -164,8 +176,6 @@
                     else {
                         txt += a[i].href + "\n";
                     }
-                    if (a[i] == sel.focusNode)
-                        break;
                 };
                 copyText(txt);
               }
