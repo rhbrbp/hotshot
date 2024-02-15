@@ -129,7 +129,7 @@
                         sel = window.location.href;
                     return "" + sel;
                 }
-                var sel = getSel();
+                var sel = getSel(true);
                 url = search(sel);
                 console.log(`located ${url}`);
                 if (!url)
