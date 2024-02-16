@@ -207,6 +207,59 @@
 
 
             {
+              name: "hxxp",
+              hotkey: "H",
+              desc: "make the most of a mangled URL",
+              exec: function () {
+                if (window.getSelection)
+                    sel = window.getSelection();
+                else if (document.getSelection)
+                    sel = document.getSelection();
+                else if (document.selection)
+                    sel = document.selection.createRange().text;
+                sel = "" + sel;
+                var urls = sel.split('\n');
+                while (urls.length) {
+                    url = "" + urls.shift();
+                    url = url.trim();
+                    if (!url)
+                        continue;
+                    var tmp = url.split(' ')[0];
+                    if (tmp.includes('/'))
+                        url = tmp;
+                    url = url.trim();
+                    url = url.trim("/");
+                    if (url.includes("s://") || !url.includes("://"))
+                        m = "https://";
+                    else
+                        m = "http://";
+                    if (url.includes("://"))
+                        url = url.substr(url.indexOf("://")+3);
+                    url = url.replace(/\s+/g, ".").replace(/\.+/g, ".");
+                    var domain = url.split('/')[0].split('.');
+					(function () {
+                    	if (domain.length == 2) {
+                        	var ok = `${m}www.${url}`;
+                        	var err = `${m}${url}`;
+                    	}
+                    	else {
+                        	var ok = `${m}${url}`;
+							var err = null;
+                    	}
+                    	fetch(ok, {
+                        	method: "HEAD",
+                        	mode: "no-cors",
+                        	referrer: "",
+                    	})
+                    	.then(r => window.open(ok, "_blank"))
+                    	.catch(e => window.open(err, "_blank"));
+					})();
+                }
+              }
+            },
+
+
+            {
               name: "pagerip",
               hotkey: "R",
               desc: "copy all image links from page",
