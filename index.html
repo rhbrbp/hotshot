@@ -162,19 +162,27 @@
                     end--;      // start node is off by one going backwards
                 }
 
+				console.log(a.length, start, end);
+				console.log(sel);
                 for (i = start; i <= end && i < a.length; i++) {
-                    if (a[i].href == "#") {
-                        var img = a[i].querySelector("img");
-                        var imgurl = img.src;
-                        // this bit is specific to SM
-                        var _ = imgurl.split("/");
-                        var size = _[_.length-2];
-                        imgurl = imgurl.replace("/"+size+"/", "/O/").replace("-"+size, "-O");
-                        txt += imgurl + "\n";
-                    }
-                    else {
-                        txt += a[i].href + "\n";
-                    }
+					try {
+                    	if (a[i].href == "#") {
+                        	var img = a[i].querySelector("img");
+                        	var imgurl = img.src;
+                        	// this bit is specific to SM
+                        	var _ = imgurl.split("/");
+                        	var size = _[_.length-2];
+                        	imgurl = imgurl.replace("/"+size+"/", "/O/").replace("-"+size, "-O");
+                        	txt += imgurl + "\n";
+                    	}
+                    	else {
+                        	txt += a[i].href + "\n";
+                    	}
+						console.log(i, a[i].href);
+					}
+					catch (e) {
+						console.log(i, a[i], e);
+					}
                 };
                 copyText(txt);
               }
