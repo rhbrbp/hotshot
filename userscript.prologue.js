@@ -95,13 +95,13 @@
             var key = String.fromCharCode(ev.keyCode);
             for (var i = 0; i < bookmarklets.length; i++) {
                 if (bookmarklets[i].hotkey == key) {
-                    eval("("+bookmarklets[i].code+")()");
+                    bookmarklets[i].exec();
                     return;
                 }
             }
             if (ev.keyCode >= 48 && ev.keyCode < 58) {
                 var i = ev.keyCode - 48;
-                eval("("+bookmarklets[i-1].code+")()");
+                bookmarklets[i-1].exec();
                 return;
             }
         }
