@@ -4,6 +4,8 @@
 // @version      @version@
 // @description  SmugMug Macros
 // @author       rhbrbp
+// @updateURL    https://rhbrbp.github.io/hotshot/hotshot.user.js
+// @downloadURL  https://rhbrbp.github.io/hotshot/hotshot.user.js
 // @match        https://*.smugmug.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=smugmug.com
 // @grant        none
