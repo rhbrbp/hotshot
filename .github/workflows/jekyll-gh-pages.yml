@@ -31,7 +31,7 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Manufacture userscript
-        run: date >hotshot.user.js
+        run: sh build-userscript >hotshot.user.js
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
