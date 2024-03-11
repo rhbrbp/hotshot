@@ -19,7 +19,7 @@
 
     var css = document.createElement("style");
     document.body.appendChild(css);
-    css.innerHTML = \`
+    css.innerHTML = `
     div.shade {
         background-color: rgba(0.5, 0.5, 0.5, 0.5);
         border-radius: 1em;
@@ -56,7 +56,7 @@
         padding: 1em;
         border: 1px solid #a0a0a0;
     }
-\`;
+`;
 
     function popupopen () {
         if (popup)
