@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HotShot
 // @namespace    https://rhbrbp.github.io/hotshot/
-// @version      0.1
+// @version      @version@
 // @description  SmugMug Macros
 // @author       rhbrbp
 // @match        https://*.smugmug.com/*
