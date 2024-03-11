@@ -1,0 +1,9 @@
+#!/bin/sh
+
+version=$(date +"0.2.%Y%m%d%H%M%S")
+sed -e "s/@version@/$version/" userscript.prologue.js
+awk '
+  /<!-- bookmarklets end -->/{printing=0}
+  printing {print}
+  /<!-- bookmarklets start -->/{printing=1}' index.html
+cat userscript.epilogue.js
