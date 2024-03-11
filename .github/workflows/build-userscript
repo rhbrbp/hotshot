@@ -1,0 +1,8 @@
+#!/bin/sh
+
+cat userscript.prologue.js
+awk '
+  /<!-- bookmarklets end -->/{printing=0}
+  printing {print}
+  /<!-- bookmarklets start -->/{printing=1}' index.html
+cat userscript.prologue.js
